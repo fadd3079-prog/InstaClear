@@ -1,0 +1,29 @@
+{
+  "name": "instaclear",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faddgraphics/InstaClear.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/faddgraphics/InstaClear/issues"
+  },
+  "homepage": "https://github.com/faddgraphics/InstaClear#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.8"
+  },
+  "devDependencies": {
+    "vite": "^8.1.5"
+  }
+}
