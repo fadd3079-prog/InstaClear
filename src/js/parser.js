@@ -100,4 +100,54 @@ function parseTableBasedHTML(htmlString) {
   return extractedUsernames;
 }
 
-export { parseLinkBasedHTML, parseTableBasedHTML };
+function extractAccountUsername(htmlString) {
+  if (!htmlString) {
+    return null;
+  }
+
+  try {
+    const parsedDocument = new DOMParser().parseFromString(
+      htmlString,
+      'text/html'
+    );
+
+    const titleText = parsedDocument.title || '';
+    const titleMatch =
+      titleText.match(/@([a-z0-9._]+)/i) ||
+      titleText.match(/instagram\s*[-–]\s*([a-z0-9._]+)/i);
+
+    if (titleMatch && titleMatch[1]) {
+      return titleMatch[1].toLowerCase().trim();
+    }
+
+    const headerElements = parsedDocument.querySelectorAll('h1, h2, ._a6-p, ._a6-q');
+    for (const headerElement of headerElements) {
+      const textContent = headerElement.textContent || '';
+      const handleMatch = textContent.match(/@([a-z0-9._]+)/i);
+
+      if (handleMatch && handleMatch[1]) {
+        return handleMatch[1].toLowerCase().trim();
+      }
+    }
+
+    const metaElement = parsedDocument.querySelector(
+      'meta[name="owner"], meta[property="og:title"]'
+    );
+
+    if (metaElement) {
+      const content = metaElement.getAttribute('content') || '';
+      const metaMatch =
+        content.match(/@([a-z0-9._]+)/i) || content.match(/([a-z0-9._]+)/i);
+
+      if (metaMatch && metaMatch[1]) {
+        return metaMatch[1].toLowerCase().trim();
+      }
+    }
+  } catch (parsingError) {
+    return null;
+  }
+
+  return null;
+}
+
+export { parseLinkBasedHTML, parseTableBasedHTML, extractAccountUsername };

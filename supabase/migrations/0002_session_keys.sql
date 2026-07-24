@@ -40,3 +40,9 @@ CREATE POLICY "Allow anonymous insert unfollow_targets"
 
 CREATE POLICY "Allow anonymous update unfollow_targets"
     ON unfollow_targets FOR UPDATE TO anon USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow anonymous delete audit_sessions"
+    ON audit_sessions FOR DELETE TO anon USING (true);
+
+CREATE POLICY "Allow anonymous delete unfollow_targets"
+    ON unfollow_targets FOR DELETE TO anon USING (true);

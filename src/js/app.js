@@ -1,13 +1,9 @@
-import { parseLinkBasedHTML, parseTableBasedHTML } from './parser.js';
-import { computeFinalTargets } from './calculator.js';
 import {
-  getActiveSessionCredentials,
-  createNewSession,
-  restoreSession,
-  fetchSessionProgress,
-  updateTargetStatusInSession,
-  clearActiveSessionCredentials,
-} from './supabase-client.js';
+  parseLinkBasedHTML,
+  parseTableBasedHTML,
+  extractAccountUsername,
+} from './parser.js';
+import { computeFinalTargets } from './calculator.js';
 
 const APPLICATION_STATE = {
   IDLE: 'IDLE',
@@ -53,6 +49,8 @@ const GRID_ROW_LAYOUT_CLASS =
 let currentState = APPLICATION_STATE.IDLE;
 let finalTargetList = [];
 let completedUsernames = new Set();
+let autoDetectedUsername = null;
+let activeAccountUsername = null;
 const parsedDatasets = {};
 
 function getAvatarColorClass(username) {
@@ -74,18 +72,15 @@ function updateUIForState(state) {
   const dropzoneSection = document.getElementById('dropzone-section');
   const processingIndicator = document.getElementById('processing-indicator');
   const dataGridSection = document.getElementById('datagrid-section');
-  const alertContainer = document.getElementById('alert-container');
 
   switch (state) {
     case APPLICATION_STATE.IDLE:
       dropzoneSection.classList.remove('hidden');
       processingIndicator.classList.add('hidden');
       dataGridSection.classList.add('hidden');
-      alertContainer.classList.add('hidden');
       break;
 
     case APPLICATION_STATE.VALIDATING:
-      alertContainer.classList.add('hidden');
       break;
 
     case APPLICATION_STATE.PARSING_AND_COMPUTING:
@@ -125,27 +120,69 @@ function showAlert(message, type) {
       ' bg-amber-50 border-amber-200 text-amber-800';
     alertIcon.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-  } else {
+  } else if (type === 'info') {
     alertContainer.className +=
       ' bg-blue-50 border-blue-200 text-blue-800';
     alertIcon.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  } else {
+    alertContainer.className +=
+      ' bg-emerald-50 border-emerald-200 text-emerald-800';
+    alertIcon.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500 shrink-0 mt-0.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
   }
 
   alertContainer.classList.remove('hidden');
 }
 
-function updateHeaderActiveSessionBadge() {
-  const activeBadge = document.getElementById('active-session-badge');
+function sanitizeUsername(input) {
+  if (!input) return '';
+  return input
+    .toLowerCase()
+    .replace(/^@/, '')
+    .replace(/[^a-z0-9._]/g, '')
+    .trim();
+}
+
+function updateHeaderActiveAccountBadge() {
+  const activeBadge = document.getElementById('active-account-badge');
   if (!activeBadge) return;
 
-  const activeSession = getActiveSessionCredentials();
-  if (activeSession) {
-    const displayName = activeSession.alias || activeSession.sessionId;
-    activeBadge.textContent = `Sesi: ${displayName}`;
+  if (activeAccountUsername) {
+    activeBadge.textContent = `Akun: @${activeAccountUsername}`;
     activeBadge.classList.remove('hidden');
   } else {
     activeBadge.classList.add('hidden');
+  }
+}
+
+function loadAccountProgress(username) {
+  if (!username) return new Set();
+
+  try {
+    const rawStorageData = localStorage.getItem(`instaclear_progress_${username}`);
+    if (!rawStorageData) return new Set();
+
+    const parsedArray = JSON.parse(rawStorageData);
+    if (Array.isArray(parsedArray)) {
+      return new Set(parsedArray);
+    }
+  } catch (storageError) {
+    return new Set();
+  }
+
+  return new Set();
+}
+
+function saveAccountProgress(username, completedSet) {
+  if (!username) return;
+
+  try {
+    const arrayToStore = Array.from(completedSet);
+    localStorage.setItem(`instaclear_progress_${username}`, JSON.stringify(arrayToStore));
+    localStorage.setItem('instaclear_active_account', username);
+  } catch (storageError) {
+    return;
   }
 }
 
@@ -211,6 +248,13 @@ async function processFiles(fileList) {
 
       parsedDatasets[fileIdentifier.key] = parsedSet;
       updateFileSlotStatus(fileIdentifier.key, parsedSet.size);
+
+      if (!autoDetectedUsername) {
+        const detectedHandle = extractAccountUsername(rawHtmlString);
+        if (detectedHandle) {
+          autoDetectedUsername = detectedHandle;
+        }
+      }
     } catch (readError) {
       parsedDatasets[fileIdentifier.key] = new Set();
       updateFileSlotStatus(fileIdentifier.key, 0);
@@ -221,7 +265,7 @@ async function processFiles(fileList) {
   transitionState(APPLICATION_STATE.IDLE);
 }
 
-async function executeComputationAndHydrate() {
+function executeComputationAndHydrate() {
   if (!checkMandatoryFiles()) {
     showAlert(
       'Berkas Mengikuti (following.html) dan Pengikut (followers_1.html) wajib diunggah sebelum memulai proses.',
@@ -229,6 +273,43 @@ async function executeComputationAndHydrate() {
     );
     return;
   }
+
+  if (autoDetectedUsername) {
+    startProcessingForAccount(autoDetectedUsername);
+  } else {
+    const savedActiveAccount = localStorage.getItem('instaclear_active_account');
+    if (savedActiveAccount) {
+      startProcessingForAccount(savedActiveAccount);
+    } else {
+      promptForAccountUsername();
+    }
+  }
+}
+
+function promptForAccountUsername() {
+  const usernameModal = document.getElementById('account-username-modal');
+  const usernameInput = document.getElementById('account-username-input');
+
+  if (usernameInput) {
+    usernameInput.value = '';
+  }
+
+  if (usernameModal) {
+    usernameModal.classList.remove('hidden');
+  }
+}
+
+function startProcessingForAccount(accountUsername) {
+  const cleanHandle = sanitizeUsername(accountUsername);
+
+  if (!cleanHandle) {
+    showAlert('Mohon masukkan nama pengguna Instagram yang valid.', 'warning');
+    return;
+  }
+
+  activeAccountUsername = cleanHandle;
+  localStorage.setItem('instaclear_active_account', cleanHandle);
+  updateHeaderActiveAccountBadge();
 
   transitionState(APPLICATION_STATE.PARSING_AND_COMPUTING);
 
@@ -243,14 +324,7 @@ async function executeComputationAndHydrate() {
     return;
   }
 
-  let activeSession = getActiveSessionCredentials();
-  if (!activeSession) {
-    activeSession = await createNewSession('', finalTargetList.length);
-    updateHeaderActiveSessionBadge();
-  }
-
-  const unfollowedHistory = await fetchSessionProgress(activeSession.sessionId);
-  completedUsernames = new Set(unfollowedHistory);
+  completedUsernames = loadAccountProgress(cleanHandle);
 
   renderDataGrid(finalTargetList);
   updateStatistics();
@@ -377,7 +451,7 @@ function renderDataGrid(targetUsernames) {
   });
 }
 
-async function handleMarkAsDone(username, rowElement, actionButton) {
+function handleMarkAsDone(username, rowElement, actionButton) {
   if (currentState === APPLICATION_STATE.MUTATING) {
     return;
   }
@@ -385,6 +459,10 @@ async function handleMarkAsDone(username, rowElement, actionButton) {
   transitionState(APPLICATION_STATE.MUTATING);
 
   completedUsernames.add(username);
+
+  if (activeAccountUsername) {
+    saveAccountProgress(activeAccountUsername, completedUsernames);
+  }
 
   rowElement.className = `${GRID_ROW_LAYOUT_CLASS} opacity-50 bg-canvas-soft-2`;
 
@@ -411,11 +489,6 @@ async function handleMarkAsDone(username, rowElement, actionButton) {
   updateStatistics();
 
   transitionState(APPLICATION_STATE.READY);
-
-  const activeSession = getActiveSessionCredentials();
-  if (activeSession) {
-    updateTargetStatusInSession(activeSession.sessionId, username, 'UNFOLLOWED');
-  }
 }
 
 function updateStatistics() {
@@ -535,47 +608,21 @@ function setupFullscreenToggle() {
   });
 }
 
-function setupSessionModals() {
+function setupAccountModalAndReset() {
   const resetButton = document.getElementById('reset-button');
-  const aliasModal = document.getElementById('alias-modal');
-  const aliasInput = document.getElementById('alias-input');
-  const cancelAliasButton = document.getElementById('cancel-alias-button');
-  const confirmAliasButton = document.getElementById('confirm-alias-button');
-
-  const credentialsModal = document.getElementById('credentials-modal');
-  const copyCredentialsButton = document.getElementById('copy-credentials-button');
-  const copyCredentialsText = document.getElementById('copy-credentials-text');
-  const copyCredentialsIcon = document.getElementById('copy-credentials-icon');
-  const downloadKeyButton = document.getElementById('download-key-button');
-  const closeCredentialsModalButton = document.getElementById('close-credentials-modal-button');
-
-  const restoreSessionButton = document.getElementById('restore-session-button');
-  const restoreModal = document.getElementById('restore-modal');
-  const restoreAlert = document.getElementById('restore-alert');
-  const restoreSessionIdInput = document.getElementById('restore-session-id-input');
-  const restoreSecurityKeyInput = document.getElementById('restore-security-key-input');
-  const cancelRestoreButton = document.getElementById('cancel-restore-button');
-  const confirmRestoreButton = document.getElementById('confirm-restore-button');
+  const usernameModal = document.getElementById('account-username-modal');
+  const usernameInput = document.getElementById('account-username-input');
+  const confirmUsernameButton = document.getElementById(
+    'confirm-account-username-button'
+  );
 
   if (resetButton) {
     resetButton.addEventListener('click', () => {
-      if (aliasInput) aliasInput.value = '';
-      if (aliasModal) aliasModal.classList.remove('hidden');
-    });
-  }
-
-  if (cancelAliasButton) {
-    cancelAliasButton.addEventListener('click', () => {
-      if (aliasModal) aliasModal.classList.add('hidden');
-    });
-  }
-
-  if (confirmAliasButton) {
-    confirmAliasButton.addEventListener('click', async () => {
-      const aliasValue = aliasInput ? aliasInput.value.trim() : '';
-
       finalTargetList = [];
       completedUsernames = new Set();
+      autoDetectedUsername = null;
+      activeAccountUsername = null;
+
       for (const key of Object.keys(parsedDatasets)) {
         delete parsedDatasets[key];
       }
@@ -585,145 +632,29 @@ function setupSessionModals() {
 
       resetFileSlotStatuses();
       updateProcessButtonState();
+      updateHeaderActiveAccountBadge();
       transitionState(APPLICATION_STATE.IDLE);
-
-      const session = await createNewSession(aliasValue, 0);
-      updateHeaderActiveSessionBadge();
-
-      if (aliasModal) aliasModal.classList.add('hidden');
-
-      const aliasElem = document.getElementById('modal-session-alias');
-      const idElem = document.getElementById('modal-session-id');
-      const keyElem = document.getElementById('modal-security-key');
-
-      if (aliasElem) aliasElem.textContent = session.alias || session.sessionId;
-      if (idElem) idElem.textContent = session.sessionId;
-      if (keyElem) keyElem.textContent = session.securityKey;
-
-      if (credentialsModal) credentialsModal.classList.remove('hidden');
     });
   }
 
-  if (copyCredentialsButton) {
-    copyCredentialsButton.addEventListener('click', () => {
-      const activeSession = getActiveSessionCredentials();
-      if (!activeSession) return;
+  if (confirmUsernameButton) {
+    confirmUsernameButton.addEventListener('click', () => {
+      const enteredValue = usernameInput ? usernameInput.value : '';
+      const cleanHandle = sanitizeUsername(enteredValue);
 
-      const formattedString = `Session ID: ${activeSession.sessionId} | Security Key: ${activeSession.securityKey}`;
-      navigator.clipboard.writeText(formattedString).then(() => {
-        if (copyCredentialsText) copyCredentialsText.textContent = 'Tersalin!';
-        if (copyCredentialsIcon) {
-          copyCredentialsIcon.innerHTML =
-            '<polyline points="20 6 9 17 4 12"></polyline>';
-        }
-        setTimeout(() => {
-          if (copyCredentialsText) copyCredentialsText.textContent = 'Salin Kunci Akses';
-          if (copyCredentialsIcon) {
-            copyCredentialsIcon.innerHTML =
-              '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
-          }
-        }, 2000);
-      });
-    });
-  }
-
-  if (downloadKeyButton) {
-    downloadKeyButton.addEventListener('click', () => {
-      const activeSession = getActiveSessionCredentials();
-      if (!activeSession) return;
-
-      const aliasName = activeSession.alias || activeSession.sessionId;
-      const fileContent = `================================================
-INSTACLEAR SESSION SECURITY KEY
-================================================
-Alias Sesi   : ${aliasName}
-Session ID   : ${activeSession.sessionId}
-Kunci Akses  : ${activeSession.securityKey}
-Waktu Dibuat : ${new Date().toLocaleString()}
-================================================
-Peringatan: Simpan file ini dengan aman. Kunci ini diperlukan
-untuk memulihkan progres unfollow Anda jika berpindah perangkat.
-`;
-
-      const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-      const downloadUrl = URL.createObjectURL(blob);
-      const anchorElement = document.createElement('a');
-      const safeAlias = aliasName.replace(/[^a-z0-9]/gi, '_');
-
-      anchorElement.href = downloadUrl;
-      anchorElement.download = `InstaClear_Key_${safeAlias}.txt`;
-      document.body.appendChild(anchorElement);
-      anchorElement.click();
-      document.body.removeChild(anchorElement);
-      URL.revokeObjectURL(downloadUrl);
-    });
-  }
-
-  if (closeCredentialsModalButton) {
-    closeCredentialsModalButton.addEventListener('click', () => {
-      if (credentialsModal) credentialsModal.classList.add('hidden');
-    });
-  }
-
-  if (restoreSessionButton) {
-    restoreSessionButton.addEventListener('click', () => {
-      if (restoreSessionIdInput) restoreSessionIdInput.value = '';
-      if (restoreSecurityKeyInput) restoreSecurityKeyInput.value = '';
-      if (restoreAlert) restoreAlert.classList.add('hidden');
-      if (restoreModal) restoreModal.classList.remove('hidden');
-    });
-  }
-
-  if (cancelRestoreButton) {
-    cancelRestoreButton.addEventListener('click', () => {
-      if (restoreModal) restoreModal.classList.add('hidden');
-    });
-  }
-
-  if (confirmRestoreButton) {
-    confirmRestoreButton.addEventListener('click', async () => {
-      const sessionIdValue = restoreSessionIdInput
-        ? restoreSessionIdInput.value.trim()
-        : '';
-      const securityKeyValue = restoreSecurityKeyInput
-        ? restoreSecurityKeyInput.value.trim()
-        : '';
-
-      if (!sessionIdValue || !securityKeyValue) {
-        if (restoreAlert) {
-          restoreAlert.textContent =
-            'Mohon isi Session ID dan Kunci Akses terlebih dahulu.';
-          restoreAlert.classList.remove('hidden');
-        }
+      if (!cleanHandle) {
+        showAlert(
+          'Mohon masukkan nama pengguna Instagram yang valid.',
+          'warning'
+        );
         return;
       }
 
-      if (restoreAlert) restoreAlert.classList.add('hidden');
-
-      const result = await restoreSession(sessionIdValue, securityKeyValue);
-
-      if (!result.success) {
-        if (restoreAlert) {
-          restoreAlert.textContent = result.error;
-          restoreAlert.classList.remove('hidden');
-        }
-        return;
+      if (usernameModal) {
+        usernameModal.classList.add('hidden');
       }
 
-      updateHeaderActiveSessionBadge();
-      completedUsernames = new Set(result.unfollowedUsernames);
-
-      if (restoreModal) restoreModal.classList.add('hidden');
-
-      if (finalTargetList.length > 0) {
-        renderDataGrid(finalTargetList);
-        updateStatistics();
-      }
-
-      showAlert(
-        `Sesi "${result.alias || result.sessionId}" berhasil dipulihkan! (${result.unfollowedUsernames.length} target telah diselesaikan).`,
-        'success'
-      );
+      startProcessingForAccount(cleanHandle);
     });
   }
 }
@@ -752,8 +683,14 @@ function initializeApplication() {
   setupDropzone();
   setupProcessButton();
   setupFullscreenToggle();
-  setupSessionModals();
-  updateHeaderActiveSessionBadge();
+  setupAccountModalAndReset();
+
+  const savedActiveAccount = localStorage.getItem('instaclear_active_account');
+  if (savedActiveAccount) {
+    activeAccountUsername = savedActiveAccount;
+    updateHeaderActiveAccountBadge();
+  }
+
   transitionState(APPLICATION_STATE.IDLE);
 }
 
