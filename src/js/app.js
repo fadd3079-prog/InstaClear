@@ -223,6 +223,37 @@ function exportSessionData() {
   showAlert('Data cadangan (.json) berhasil diunduh!', 'success');
 }
 
+async function importSessionData(file) {
+  try {
+    const jsonString = await readFileAsText(file);
+    const parsedData = JSON.parse(jsonString);
+
+    if (
+      parsedData.application !== 'InstaClear' ||
+      !parsedData.accountUsername ||
+      !Array.isArray(parsedData.allTargets) ||
+      !Array.isArray(parsedData.completedUnfollowedTargets)
+    ) {
+      throw new Error('Struktur berkas cadangan tidak valid.');
+    }
+
+    activeAccountUsername = parsedData.accountUsername;
+    finalTargetList = parsedData.allTargets;
+    completedUsernames = new Set(parsedData.completedUnfollowedTargets);
+
+    saveAccountProgress(activeAccountUsername, completedUsernames);
+    updateHeaderActiveAccountBadge();
+
+    renderDataGrid(finalTargetList);
+    updateStatistics();
+    transitionState(APPLICATION_STATE.READY);
+
+    showAlert('Data cadangan berhasil diimpor. Progres Anda telah dipulihkan sepenuhnya.', 'success');
+  } catch (error) {
+    showAlert('Gagal mengimpor data: ' + error.message, 'error');
+  }
+}
+
 function identifyFileType(fileName) {
   const identifiers = Object.values(FILE_IDENTIFIERS);
 
@@ -647,6 +678,8 @@ function setupFullscreenToggle() {
 
 function setupExportAndWipeHandlers() {
   const exportDataButton = document.getElementById('export-data-button');
+  const importDataButton = document.getElementById('import-data-button');
+  const importFileInput = document.getElementById('import-file-input');
   const resetButton = document.getElementById('reset-button');
   const newSessionModal = document.getElementById('new-session-modal');
   const modalCancelWipeButton = document.getElementById('modal-cancel-wipe-button');
@@ -656,6 +689,20 @@ function setupExportAndWipeHandlers() {
   const usernameModal = document.getElementById('account-username-modal');
   const usernameInput = document.getElementById('account-username-input');
   const confirmUsernameButton = document.getElementById('confirm-account-username-button');
+
+  if (importDataButton && importFileInput) {
+    importDataButton.addEventListener('click', () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener('change', (event) => {
+      const selectedFile = event.target.files[0];
+      if (selectedFile) {
+        importSessionData(selectedFile);
+      }
+      importFileInput.value = '';
+    });
+  }
 
   if (exportDataButton) {
     exportDataButton.addEventListener('click', () => {

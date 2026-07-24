@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS unfollow_targets (
     source_category VARCHAR(50) DEFAULT 'NOT_FOLLOWING_BACK',
     action_status VARCHAR(50) DEFAULT 'WAITING',
     executed_at TIMESTAMPTZ,
-    CONSTRAINT unique_session_target UNIQUE (session_id, ig_username)
+    CONSTRAINT unique_session_target UNIQUE (session_id,ig_username)
 );
 
 CREATE INDEX IF NOT EXISTS idx_unfollow_targets_session_id ON unfollow_targets (session_id);
@@ -40,9 +40,3 @@ CREATE POLICY "Allow anonymous insert unfollow_targets"
 
 CREATE POLICY "Allow anonymous update unfollow_targets"
     ON unfollow_targets FOR UPDATE TO anon USING (true) WITH CHECK (true);
-
-CREATE POLICY "Allow anonymous delete audit_sessions"
-    ON audit_sessions FOR DELETE TO anon USING (true);
-
-CREATE POLICY "Allow anonymous delete unfollow_targets"
-    ON unfollow_targets FOR DELETE TO anon USING (true);
