@@ -35,6 +35,7 @@ let currentState = APPLICATION_STATE.IDLE;
 let deviceId = null;
 let finalTargetList = [];
 let completedUsernames = new Set();
+const parsedDatasets = {};
 
 function transitionState(newState) {
   currentState = newState;
@@ -127,11 +128,23 @@ function readFileAsText(file) {
   });
 }
 
+function checkMandatoryFiles() {
+  return Boolean(parsedDatasets.following && parsedDatasets.followers);
+}
+
+function updateProcessButtonState() {
+  const processButton = document.getElementById('process-button');
+  if (!processButton) return;
+
+  if (checkMandatoryFiles()) {
+    processButton.disabled = false;
+  } else {
+    processButton.disabled = true;
+  }
+}
+
 async function processFiles(fileList) {
   transitionState(APPLICATION_STATE.VALIDATING);
-
-  const validatedFiles = [];
-  const identifiedKeys = new Set();
 
   for (const file of fileList) {
     if (file.type !== 'text/html' && !file.name.endsWith('.html')) {
@@ -140,56 +153,44 @@ async function processFiles(fileList) {
 
     const fileIdentifier = identifyFileType(file.name);
 
-    if (fileIdentifier && !identifiedKeys.has(fileIdentifier.key)) {
-      validatedFiles.push({ file, identifier: fileIdentifier });
-      identifiedKeys.add(fileIdentifier.key);
+    if (!fileIdentifier) {
+      continue;
     }
-  }
 
-  if (!identifiedKeys.has('following')) {
-    showAlert(
-      'Berkas Mengikuti (Following) belum disertakan. Kalkulasi himpunan memerlukan data ini.',
-      'error'
-    );
-    transitionState(APPLICATION_STATE.IDLE);
-    return;
-  }
-
-  if (!identifiedKeys.has('followers')) {
-    showAlert(
-      'Berkas Pengikut (Followers) belum disertakan. Kalkulasi himpunan memerlukan data ini.',
-      'error'
-    );
-    transitionState(APPLICATION_STATE.IDLE);
-    return;
-  }
-
-  transitionState(APPLICATION_STATE.PARSING_AND_COMPUTING);
-
-  const datasetObject = {};
-
-  for (const { file, identifier } of validatedFiles) {
     try {
       const rawHtmlString = await readFileAsText(file);
-
       let parsedSet;
 
-      if (identifier.type === 'link') {
+      if (fileIdentifier.type === 'link') {
         parsedSet = parseLinkBasedHTML(rawHtmlString);
       } else {
         parsedSet = parseTableBasedHTML(rawHtmlString);
       }
 
-      datasetObject[identifier.key] = parsedSet;
-
-      updateFileSlotStatus(identifier.key, parsedSet.size);
+      parsedDatasets[fileIdentifier.key] = parsedSet;
+      updateFileSlotStatus(fileIdentifier.key, parsedSet.size);
     } catch (readError) {
-      datasetObject[identifier.key] = new Set();
-      updateFileSlotStatus(identifier.key, 0);
+      parsedDatasets[fileIdentifier.key] = new Set();
+      updateFileSlotStatus(fileIdentifier.key, 0);
     }
   }
 
-  finalTargetList = computeFinalTargets(datasetObject);
+  updateProcessButtonState();
+  transitionState(APPLICATION_STATE.IDLE);
+}
+
+async function executeComputationAndHydrate() {
+  if (!checkMandatoryFiles()) {
+    showAlert(
+      'Berkas Mengikuti (following.html) dan Pengikut (followers_1.html) wajib diunggah sebelum memulai proses.',
+      'warning'
+    );
+    return;
+  }
+
+  transitionState(APPLICATION_STATE.PARSING_AND_COMPUTING);
+
+  finalTargetList = computeFinalTargets(parsedDatasets);
 
   if (finalTargetList.length === 0) {
     showAlert(
@@ -419,6 +420,15 @@ function setupDropzone() {
   });
 }
 
+function setupProcessButton() {
+  const processButton = document.getElementById('process-button');
+  if (!processButton) return;
+
+  processButton.addEventListener('click', () => {
+    executeComputationAndHydrate();
+  });
+}
+
 function setupResetButton() {
   const resetButton = document.getElementById('reset-button');
 
@@ -430,12 +440,17 @@ function setupResetButton() {
     finalTargetList = [];
     completedUsernames = new Set();
 
+    for (const key of Object.keys(parsedDatasets)) {
+      delete parsedDatasets[key];
+    }
+
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
       fileInput.value = '';
     }
 
     resetFileSlotStatuses();
+    updateProcessButtonState();
     transitionState(APPLICATION_STATE.IDLE);
   });
 }
@@ -462,6 +477,7 @@ function resetFileSlotStatuses() {
 
 function initializeApplication() {
   setupDropzone();
+  setupProcessButton();
   setupResetButton();
   transitionState(APPLICATION_STATE.IDLE);
 }
