@@ -1,8 +1,4 @@
-import {
-  parseLinkBasedHTML,
-  parseTableBasedHTML,
-  extractAccountUsername,
-} from './parser.js';
+import { parseMetaJSON } from './parser.js';
 import { computeFinalTargets } from './calculator.js';
 import { purgeRemoteSession } from './supabase-client.js';
 
@@ -15,20 +11,12 @@ const APPLICATION_STATE = {
 };
 
 const FILE_IDENTIFIERS = {
-  following: { pattern: /following/i, type: 'link', key: 'following' },
-  followers: { pattern: /followers/i, type: 'link', key: 'followers' },
-  pending: { pattern: /pending/i, type: 'table', key: 'pendingRequests' },
-  recent: { pattern: /recent_follow/i, type: 'table', key: 'recentRequests' },
-  unfollowed: {
-    pattern: /recently_unfollowed/i,
-    type: 'table',
-    key: 'recentlyUnfollowed',
-  },
-  removed: {
-    pattern: /removed_suggestions/i,
-    type: 'table',
-    key: 'removedSuggestions',
-  },
+  following: { pattern: /following/i, key: 'following' },
+  followers: { pattern: /followers/i, key: 'followers' },
+  pending: { pattern: /pending/i, key: 'pendingRequests' },
+  recent: { pattern: /recent_follow/i, key: 'recentRequests' },
+  unfollowed: { pattern: /recently_unfollowed/i, key: 'recentlyUnfollowed' },
+  removed: { pattern: /removed_suggestions/i, key: 'removedSuggestions' },
 };
 
 const AVATAR_COLORS = [
@@ -294,7 +282,7 @@ async function processFiles(fileList) {
   transitionState(APPLICATION_STATE.VALIDATING);
 
   for (const file of fileList) {
-    if (file.type !== 'text/html' && !file.name.endsWith('.html')) {
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
       continue;
     }
 
@@ -305,24 +293,16 @@ async function processFiles(fileList) {
     }
 
     try {
-      const rawHtmlString = await readFileAsText(file);
-      let parsedSet;
+      const rawJsonString = await readFileAsText(file);
+      const parsedSet = parseMetaJSON(rawJsonString);
 
-      if (fileIdentifier.type === 'link') {
-        parsedSet = parseLinkBasedHTML(rawHtmlString);
+      if (!parsedDatasets[fileIdentifier.key]) {
+        parsedDatasets[fileIdentifier.key] = parsedSet;
       } else {
-        parsedSet = parseTableBasedHTML(rawHtmlString);
+        parsedSet.forEach(item => parsedDatasets[fileIdentifier.key].add(item));
       }
 
-      parsedDatasets[fileIdentifier.key] = parsedSet;
-      updateFileSlotStatus(fileIdentifier.key, parsedSet.size);
-
-      if (!autoDetectedUsername) {
-        const detectedHandle = extractAccountUsername(rawHtmlString);
-        if (detectedHandle) {
-          autoDetectedUsername = detectedHandle;
-        }
-      }
+      updateFileSlotStatus(fileIdentifier.key, parsedDatasets[fileIdentifier.key].size);
     } catch (readError) {
       parsedDatasets[fileIdentifier.key] = new Set();
       updateFileSlotStatus(fileIdentifier.key, 0);
@@ -336,7 +316,7 @@ async function processFiles(fileList) {
 function executeComputationAndHydrate() {
   if (!checkMandatoryFiles()) {
     showAlert(
-      'Berkas Mengikuti (following.html) dan Pengikut (followers_1.html) wajib diunggah sebelum memulai proses.',
+      'Berkas Mengikuti (following.json) dan Pengikut (followers_1.json) wajib diunggah sebelum memulai proses.',
       'warning'
     );
     return;

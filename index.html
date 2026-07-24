@@ -138,13 +138,13 @@
         <p class="text-xs font-mono text-mute uppercase tracking-wide mb-3">Audit Engine</p>
         <h1 class="text-3xl font-semibold tracking-display-lg text-ink leading-tight mb-2">Unggah Berkas Ekspor Meta.
         </h1>
-        <p class="text-base text-body leading-relaxed max-w-xl">Seret dan lepaskan berkas HTML hasil ekspor Instagram ke
+        <p class="text-base text-body leading-relaxed max-w-xl">Seret dan lepaskan berkas JSON hasil ekspor Instagram ke
           area di bawah ini. Sistem akan memproses data secara lokal di perangkat Anda.</p>
       </div>
 
       <div id="dropzone-area"
         class="border-2 border-dashed border-hairline rounded-xl p-10 text-center hover:border-hairline-strong transition-all bg-canvas-soft/50 cursor-pointer mb-10 group">
-        <input id="file-input" type="file" multiple accept=".html" class="hidden" />
+        <input id="file-input" type="file" multiple accept=".json" class="hidden" />
         <div class="w-12 h-12 rounded-full bg-canvas border border-hairline flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-mute group-hover:text-ink transition-colors">
@@ -153,8 +153,8 @@
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
-        <p class="text-sm font-medium text-ink mb-1">Seret & Lepas berkas HTML di sini, atau klik untuk merambah</p>
-        <p class="text-xs text-mute font-mono">Mendukung berkas format .html hasil ekspor Meta</p>
+        <p class="text-sm font-medium text-ink mb-1">Seret & Lepas berkas JSON di sini, atau klik untuk merambah</p>
+        <p class="text-xs text-mute font-mono">Mendukung berkas format .json hasil ekspor Meta</p>
       </div>
 
       <div class="mb-10">
@@ -164,7 +164,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-ink"></span>
-                <p class="text-xs font-mono font-medium text-ink">following.html</p>
+                <p class="text-xs font-mono font-medium text-ink">following.json</p>
               </div>
               <p class="text-[11px] text-mute">Daftar Akun Mengikuti</p>
             </div>
@@ -175,7 +175,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-ink"></span>
-                <p class="text-xs font-mono font-medium text-ink">followers_1.html</p>
+                <p class="text-xs font-mono font-medium text-ink">followers_1.json</p>
               </div>
               <p class="text-[11px] text-mute">Daftar Akun Pengikut</p>
             </div>
@@ -186,7 +186,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-mute"></span>
-                <p class="text-xs font-mono font-medium text-ink">pending_follow_requests.html</p>
+                <p class="text-xs font-mono font-medium text-ink">pending_follow_requests.json</p>
               </div>
               <p class="text-[11px] text-mute">Permintaan Mengikuti (Opsional)</p>
             </div>
@@ -197,7 +197,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-mute"></span>
-                <p class="text-xs font-mono font-medium text-ink">recent_follow_requests.html</p>
+                <p class="text-xs font-mono font-medium text-ink">recent_follow_requests.json</p>
               </div>
               <p class="text-[11px] text-mute">Permintaan Terbaru (Opsional)</p>
             </div>
@@ -208,7 +208,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-mute"></span>
-                <p class="text-xs font-mono font-medium text-ink">recently_unfollowed_profiles.html</p>
+                <p class="text-xs font-mono font-medium text-ink">recently_unfollowed_profiles.json</p>
               </div>
               <p class="text-[11px] text-mute">Baru Berhenti Mengikuti (Opsional)</p>
             </div>
@@ -219,7 +219,7 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-mute"></span>
-                <p class="text-xs font-mono font-medium text-ink">removed_suggestions.html</p>
+                <p class="text-xs font-mono font-medium text-ink">removed_suggestions.json</p>
               </div>
               <p class="text-[11px] text-mute">Saran Dihapus (Opsional)</p>
             </div>
@@ -241,7 +241,7 @@
 
     <div id="processing-indicator" class="hidden py-20 text-center animate-fade-in">
       <div class="w-10 h-10 border-2 border-hairline border-t-ink rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-sm font-medium text-ink mb-1">Memproses Berkas HTML...</p>
+      <p class="text-sm font-medium text-ink mb-1">Memproses Berkas JSON...</p>
       <p class="text-xs text-mute font-mono">Mengekstrak dan mengkalkulasi selisih himpunan data</p>
     </div>
 
