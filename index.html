@@ -314,21 +314,36 @@
             style="width: 0%"></div>
         </div>
       </div>
-      <div class="bg-canvas rounded-xl shadow-card-float overflow-hidden animate-fade-in-up"
+      <div id="table-container" class="bg-canvas rounded-xl shadow-card-float overflow-hidden animate-fade-in-up relative transition-all"
         style="animation-delay: 0.2s">
-        <div class="px-4 py-3 border-b border-hairline bg-canvas-soft">
-          <div class="grid grid-cols-[60px_1fr_120px_100px] gap-0">
-            <span class="text-xs font-mono text-mute uppercase tracking-wide">#</span>
-            <span class="text-xs font-mono text-mute uppercase tracking-wide">Nama Pengguna</span>
-            <span class="text-xs font-mono text-mute uppercase tracking-wide">Status</span>
-            <span class="text-xs font-mono text-mute uppercase tracking-wide">Aksi</span>
+        <div class="overflow-x-auto">
+          <div class="min-w-[540px]">
+            <div class="sticky top-0 z-10 bg-canvas-soft border-b border-hairline px-4 sm:px-6 py-3.5">
+              <div class="flex items-center justify-between gap-4">
+                <div class="grid grid-cols-[45px_1fr_110px_90px] sm:grid-cols-[55px_1fr_130px_100px] md:grid-cols-[65px_1fr_140px_110px] gap-2 sm:gap-3 md:gap-4 items-center w-full">
+                  <span class="text-xs font-mono text-mute uppercase tracking-wide text-left">#</span>
+                  <span class="text-xs font-mono text-mute uppercase tracking-wide text-left">Pengguna</span>
+                  <span class="text-xs font-mono text-mute uppercase tracking-wide text-left">Status</span>
+                  <span class="text-xs font-mono text-mute uppercase tracking-wide text-right">Aksi</span>
+                </div>
+                <button id="fullscreen-button" type="button"
+                  class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-hairline hover:bg-canvas hover:border-hairline-strong transition-all text-body hover:text-ink shrink-0"
+                  title="Layar Penuh">
+                  <svg id="fullscreen-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div id="table-scroll-area" class="overflow-y-auto max-h-[600px]">
+              <div id="datagrid-body">
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="overflow-y-auto max-h-[600px]">
-          <table class="w-full">
-            <tbody id="datagrid-body">
-            </tbody>
-          </table>
         </div>
       </div>
     </section>

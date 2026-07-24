@@ -31,11 +31,37 @@ const FILE_IDENTIFIERS = {
   },
 };
 
+const AVATAR_COLORS = [
+  'bg-blue-500',
+  'bg-emerald-500',
+  'bg-purple-500',
+  'bg-rose-500',
+  'bg-amber-500',
+  'bg-indigo-500',
+  'bg-teal-500',
+  'bg-cyan-500',
+  'bg-violet-500',
+  'bg-fuchsia-500',
+];
+
+const GRID_ROW_LAYOUT_CLASS =
+  'grid grid-cols-[45px_1fr_110px_90px] sm:grid-cols-[55px_1fr_130px_100px] md:grid-cols-[65px_1fr_140px_110px] gap-2 sm:gap-3 md:gap-4 items-center px-4 sm:px-6 py-3 border-b border-hairline';
+
 let currentState = APPLICATION_STATE.IDLE;
 let deviceId = null;
 let finalTargetList = [];
 let completedUsernames = new Set();
 const parsedDatasets = {};
+
+function getAvatarColorClass(username) {
+  let hashValue = 0;
+  for (let charIndex = 0; charIndex < username.length; charIndex++) {
+    hashValue =
+      username.charCodeAt(charIndex) + ((hashValue << 5) - hashValue);
+  }
+  const colorIndex = Math.abs(hashValue) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[colorIndex];
+}
 
 function transitionState(newState) {
   currentState = newState;
@@ -241,86 +267,99 @@ function updateFileSlotStatus(fileKey, extractedCount) {
 }
 
 function renderDataGrid(targetUsernames) {
-  const tableBody = document.getElementById('datagrid-body');
-  tableBody.textContent = '';
+  const datagridBody = document.getElementById('datagrid-body');
+  datagridBody.textContent = '';
 
   targetUsernames.forEach((username, index) => {
     const isCompleted = completedUsernames.has(username);
-    const tableRow = document.createElement('tr');
+    const rowElement = document.createElement('div');
 
-    tableRow.setAttribute('data-username', username);
-    tableRow.className = isCompleted
-      ? 'border-b border-gray-100 opacity-50 bg-gray-50'
-      : 'border-b border-gray-100 hover:bg-gray-50 transition-colors';
+    rowElement.setAttribute('data-username', username);
+    rowElement.className = isCompleted
+      ? `${GRID_ROW_LAYOUT_CLASS} opacity-50 bg-canvas-soft-2`
+      : `${GRID_ROW_LAYOUT_CLASS} hover:bg-canvas-soft transition-colors`;
 
-    const indexCell = document.createElement('td');
-    indexCell.className = 'px-4 py-3 text-sm text-gray-400 tabular-nums';
+    const indexCell = document.createElement('div');
+    indexCell.className =
+      'text-xs sm:text-sm text-mute font-mono tabular-nums text-left';
     indexCell.textContent = String(index + 1).padStart(3, '0');
-    tableRow.appendChild(indexCell);
+    rowElement.appendChild(indexCell);
 
-    const usernameCell = document.createElement('td');
-    usernameCell.className = isCompleted
-      ? 'px-4 py-3 text-sm text-gray-500 line-through'
-      : 'px-4 py-3 text-sm text-gray-900 font-medium';
-    usernameCell.textContent = username;
-    tableRow.appendChild(usernameCell);
+    const usernameCell = document.createElement('div');
+    usernameCell.className =
+      'flex items-center gap-2.5 sm:gap-3 text-left overflow-hidden min-w-0';
 
-    const statusCell = document.createElement('td');
-    statusCell.className = 'px-4 py-3';
+    const initialLetter = username.charAt(0).toUpperCase();
+    const avatarColorClass = getAvatarColorClass(username);
+
+    const avatarElement = document.createElement('div');
+    avatarElement.className = `w-7 h-7 sm:w-8 sm:h-8 rounded-full ${avatarColorClass} text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm`;
+    avatarElement.textContent = initialLetter;
+
+    const usernameText = document.createElement('span');
+    usernameText.className = isCompleted
+      ? 'text-xs sm:text-sm text-mute line-through font-medium truncate'
+      : 'text-xs sm:text-sm text-ink font-medium truncate';
+    usernameText.textContent = `@${username}`;
+
+    usernameCell.appendChild(avatarElement);
+    usernameCell.appendChild(usernameText);
+    rowElement.appendChild(usernameCell);
+
+    const statusCell = document.createElement('div');
+    statusCell.className = 'text-left';
 
     const statusBadge = document.createElement('span');
     statusBadge.className = isCompleted
-      ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500'
-      : 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700';
+      ? 'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-canvas-soft-2 text-mute border border-hairline'
+      : 'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200';
     statusBadge.textContent = isCompleted ? 'UNFOLLOWED' : 'WAITING';
     statusCell.appendChild(statusBadge);
-    tableRow.appendChild(statusCell);
+    rowElement.appendChild(statusCell);
 
-    const actionsCell = document.createElement('td');
-    actionsCell.className = 'px-4 py-3';
-
-    const actionsWrapper = document.createElement('div');
-    actionsWrapper.className = 'flex items-center gap-2';
+    const actionsCell = document.createElement('div');
+    actionsCell.className =
+      'flex items-center justify-end gap-1.5 sm:gap-2 text-right';
 
     const openLinkButton = document.createElement('button');
+    openLinkButton.type = 'button';
     openLinkButton.className =
-      'inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-500 hover:text-gray-700';
+      'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-hairline hover:bg-canvas-soft hover:border-hairline-strong transition-all text-body hover:text-ink shrink-0';
     openLinkButton.setAttribute('title', 'Buka Profil Instagram');
     openLinkButton.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     openLinkButton.addEventListener('click', () => {
       window.open(`https://www.instagram.com/${username}`, '_blank');
     });
-    actionsWrapper.appendChild(openLinkButton);
+    actionsCell.appendChild(openLinkButton);
 
     if (isCompleted) {
       const completedIndicator = document.createElement('span');
       completedIndicator.className =
-        'inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-300';
+        'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md text-gray-300 shrink-0';
       completedIndicator.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-      actionsWrapper.appendChild(completedIndicator);
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      actionsCell.appendChild(completedIndicator);
     } else {
       const markDoneButton = document.createElement('button');
+      markDoneButton.type = 'button';
       markDoneButton.className =
-        'inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all text-gray-500 hover:text-emerald-600';
+        'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-hairline hover:bg-emerald-50 hover:border-emerald-300 transition-all text-body hover:text-emerald-600 shrink-0';
       markDoneButton.setAttribute('title', 'Tandai Selesai');
       markDoneButton.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       markDoneButton.addEventListener('click', () => {
-        handleMarkAsDone(username, tableRow, markDoneButton);
+        handleMarkAsDone(username, rowElement, markDoneButton);
       });
-      actionsWrapper.appendChild(markDoneButton);
+      actionsCell.appendChild(markDoneButton);
     }
 
-    actionsCell.appendChild(actionsWrapper);
-    tableRow.appendChild(actionsCell);
-
-    tableBody.appendChild(tableRow);
+    rowElement.appendChild(actionsCell);
+    datagridBody.appendChild(rowElement);
   });
 }
 
-async function handleMarkAsDone(username, tableRow, actionButton) {
+async function handleMarkAsDone(username, rowElement, actionButton) {
   if (currentState === APPLICATION_STATE.MUTATING) {
     return;
   }
@@ -329,21 +368,26 @@ async function handleMarkAsDone(username, tableRow, actionButton) {
 
   completedUsernames.add(username);
 
-  tableRow.className = 'border-b border-gray-100 opacity-50 bg-gray-50';
+  rowElement.className = `${GRID_ROW_LAYOUT_CLASS} opacity-50 bg-canvas-soft-2`;
 
-  const usernameCell = tableRow.querySelectorAll('td')[1];
-  usernameCell.className = 'px-4 py-3 text-sm text-gray-500 line-through';
+  const usernameTextElement = rowElement.querySelector('span.truncate');
+  if (usernameTextElement) {
+    usernameTextElement.className =
+      'text-xs sm:text-sm text-mute line-through font-medium truncate';
+  }
 
-  const statusBadge = tableRow.querySelector('span');
-  statusBadge.className =
-    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500';
-  statusBadge.textContent = 'UNFOLLOWED';
+  const statusBadge = rowElement.querySelector('span.rounded-full');
+  if (statusBadge) {
+    statusBadge.className =
+      'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-canvas-soft-2 text-mute border border-hairline';
+    statusBadge.textContent = 'UNFOLLOWED';
+  }
 
   const completedIndicator = document.createElement('span');
   completedIndicator.className =
-    'inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-300';
+    'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md text-gray-300 shrink-0';
   completedIndicator.innerHTML =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   actionButton.replaceWith(completedIndicator);
 
   updateStatistics();
@@ -429,6 +473,47 @@ function setupProcessButton() {
   });
 }
 
+function setupFullscreenToggle() {
+  const tableContainer = document.getElementById('table-container');
+  const fullscreenButton = document.getElementById('fullscreen-button');
+  const fullscreenIcon = document.getElementById('fullscreen-icon');
+  const tableScrollArea = document.getElementById('table-scroll-area');
+
+  if (!fullscreenButton || !tableContainer) return;
+
+  fullscreenButton.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      if (tableContainer.requestFullscreen) {
+        tableContainer.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    const isFullscreen = Boolean(document.fullscreenElement);
+
+    if (isFullscreen) {
+      tableContainer.classList.add('p-4', 'sm:p-6', 'bg-white', 'h-full');
+      tableScrollArea.classList.remove('max-h-[600px]');
+      tableScrollArea.classList.add('h-[calc(100vh-100px)]');
+      fullscreenButton.setAttribute('title', 'Keluar Layar Penuh');
+      fullscreenIcon.innerHTML =
+        '<polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line>';
+    } else {
+      tableContainer.classList.remove('p-4', 'sm:p-6', 'bg-white', 'h-full');
+      tableScrollArea.classList.add('max-h-[600px]');
+      tableScrollArea.classList.remove('h-[calc(100vh-100px)]');
+      fullscreenButton.setAttribute('title', 'Layar Penuh');
+      fullscreenIcon.innerHTML =
+        '<polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>';
+    }
+  });
+}
+
 function setupResetButton() {
   const resetButton = document.getElementById('reset-button');
 
@@ -478,6 +563,7 @@ function resetFileSlotStatuses() {
 function initializeApplication() {
   setupDropzone();
   setupProcessButton();
+  setupFullscreenToggle();
   setupResetButton();
   transitionState(APPLICATION_STATE.IDLE);
 }
