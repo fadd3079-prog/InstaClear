@@ -4,6 +4,7 @@ import {
   extractAccountUsername,
 } from './parser.js';
 import { computeFinalTargets } from './calculator.js';
+import { purgeRemoteSession } from './supabase-client.js';
 
 const APPLICATION_STATE = {
   IDLE: 'IDLE',
@@ -184,6 +185,42 @@ function saveAccountProgress(username, completedSet) {
   } catch (storageError) {
     return;
   }
+}
+
+function exportSessionData() {
+  const accountName = activeAccountUsername || 'anonymous';
+  const completedArray = Array.from(completedUsernames);
+
+  const backupDataObject = {
+    application: 'InstaClear',
+    version: '1.0.0',
+    accountUsername: accountName,
+    exportedAt: new Date().toISOString(),
+    statistics: {
+      totalTargets: finalTargetList.length,
+      completedUnfollow: completedArray.length,
+      remainingTargets: finalTargetList.length - completedArray.length,
+    },
+    completedUnfollowedTargets: completedArray,
+    allTargets: finalTargetList,
+  };
+
+  const jsonString = JSON.stringify(backupDataObject, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+  const downloadUrl = URL.createObjectURL(blob);
+
+  const currentDate = new Date().toISOString().split('T')[0];
+  const safeAccountName = accountName.replace(/[^a-z0-9]/gi, '_');
+
+  const anchorElement = document.createElement('a');
+  anchorElement.href = downloadUrl;
+  anchorElement.download = `InstaClear_Backup_${safeAccountName}_${currentDate}.json`;
+  document.body.appendChild(anchorElement);
+  anchorElement.click();
+  document.body.removeChild(anchorElement);
+  URL.revokeObjectURL(downloadUrl);
+
+  showAlert('Data cadangan (.json) berhasil diunduh!', 'success');
 }
 
 function identifyFileType(fileName) {
@@ -608,16 +645,55 @@ function setupFullscreenToggle() {
   });
 }
 
-function setupAccountModalAndReset() {
+function setupExportAndWipeHandlers() {
+  const exportDataButton = document.getElementById('export-data-button');
   const resetButton = document.getElementById('reset-button');
+  const newSessionModal = document.getElementById('new-session-modal');
+  const modalCancelWipeButton = document.getElementById('modal-cancel-wipe-button');
+  const modalExportBackupButton = document.getElementById('modal-export-backup-button');
+  const modalConfirmWipeButton = document.getElementById('modal-confirm-wipe-button');
+
   const usernameModal = document.getElementById('account-username-modal');
   const usernameInput = document.getElementById('account-username-input');
-  const confirmUsernameButton = document.getElementById(
-    'confirm-account-username-button'
-  );
+  const confirmUsernameButton = document.getElementById('confirm-account-username-button');
+
+  if (exportDataButton) {
+    exportDataButton.addEventListener('click', () => {
+      exportSessionData();
+    });
+  }
 
   if (resetButton) {
     resetButton.addEventListener('click', () => {
+      if (newSessionModal) {
+        newSessionModal.classList.remove('hidden');
+      }
+    });
+  }
+
+  if (modalCancelWipeButton) {
+    modalCancelWipeButton.addEventListener('click', () => {
+      if (newSessionModal) {
+        newSessionModal.classList.add('hidden');
+      }
+    });
+  }
+
+  if (modalExportBackupButton) {
+    modalExportBackupButton.addEventListener('click', () => {
+      exportSessionData();
+    });
+  }
+
+  if (modalConfirmWipeButton) {
+    modalConfirmWipeButton.addEventListener('click', async () => {
+      if (activeAccountUsername) {
+        await purgeRemoteSession(activeAccountUsername);
+        localStorage.removeItem(`instaclear_progress_${activeAccountUsername}`);
+      }
+
+      localStorage.removeItem('instaclear_active_account');
+
       finalTargetList = [];
       completedUsernames = new Set();
       autoDetectedUsername = null;
@@ -633,7 +709,16 @@ function setupAccountModalAndReset() {
       resetFileSlotStatuses();
       updateProcessButtonState();
       updateHeaderActiveAccountBadge();
+
+      if (newSessionModal) {
+        newSessionModal.classList.add('hidden');
+      }
+
       transitionState(APPLICATION_STATE.IDLE);
+      showAlert(
+        'Sesi telah dibersihkan secara permanen. Anda dapat memulai audit baru.',
+        'success'
+      );
     });
   }
 
@@ -643,10 +728,7 @@ function setupAccountModalAndReset() {
       const cleanHandle = sanitizeUsername(enteredValue);
 
       if (!cleanHandle) {
-        showAlert(
-          'Mohon masukkan nama pengguna Instagram yang valid.',
-          'warning'
-        );
+        showAlert('Mohon masukkan nama pengguna Instagram yang valid.', 'warning');
         return;
       }
 
@@ -683,7 +765,7 @@ function initializeApplication() {
   setupDropzone();
   setupProcessButton();
   setupFullscreenToggle();
-  setupAccountModalAndReset();
+  setupExportAndWipeHandlers();
 
   const savedActiveAccount = localStorage.getItem('instaclear_active_account');
   if (savedActiveAccount) {
