@@ -49,8 +49,26 @@ function parseMetaJSON(jsonString) {
       } else if (obj !== null && typeof obj === 'object') {
         if (obj.string_list_data && Array.isArray(obj.string_list_data)) {
           obj.string_list_data.forEach(item => {
+            let candidate = null;
+
             if (item && item.value && typeof item.value === 'string') {
-              const sanitized = normalizeUsername(item.value);
+              candidate = item.value;
+            } else if (item && item.href && typeof item.href === 'string') {
+              const match = item.href.match(/instagram\.com\/(?:_u\/)?([^"?#&'<>]+)/i);
+              if (match && match[1]) {
+                const segments = match[1].split('/').filter(Boolean);
+                if (segments.length > 0) {
+                  candidate = segments[0];
+                }
+              }
+            }
+
+            if (!candidate && obj.title && typeof obj.title === 'string') {
+              candidate = obj.title;
+            }
+
+            if (candidate) {
+              const sanitized = normalizeUsername(candidate);
               if (isValidUsername(sanitized)) {
                 extractedUsernames.add(sanitized);
               }
