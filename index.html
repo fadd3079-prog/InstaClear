@@ -11,48 +11,8 @@
   <meta name="keywords" content="Mufaddhol, Fadd Graphics, InstaClear, Instagram Unfollow Audit, Pelacak Unfollow" />
   <link rel="icon" type="image/svg+xml" href="/assets/icon/instaclear.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: [
-              'Inter',
-              '-apple-system',
-              'BlinkMacSystemFont',
-              'Segoe UI',
-              'Roboto',
-              'sans-serif',
-            ],
-            mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'monospace'],
-          },
-          letterSpacing: {
-            'display-lg': '-0.035em',
-            'display-md': '-0.025em',
-          },
-          boxShadow: {
-            card: '0 1px 3px 0 rgb(0 0 0 / 0.05)',
-            'card-float':
-              '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.2s ease-out',
-            'fade-in-up': 'fadeInUp 0.3s ease-out',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            fadeInUp: {
-              '0%': { opacity: '0', transform: 'translateY(8px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-          },
-        },
-      },
-    };
-  </script>
+  <script src="/src/js/tailwind.config.js"></script>
+  <link rel="stylesheet" href="/src/css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -373,7 +333,8 @@
           koneksi API langsung ke akun Anda. Seluruh proses kalkulasi dan perbandingan data dilakukan 100% secara lokal
           di dalam peramban (<em>browser</em>) perangkat Anda. Data Anda tidak pernah dikirim, disimpan, atau diproses
           di peladen (<em>server</em>) eksternal, menjadikan InstaClear solusi paling aman untuk mengaudit pengikut
-          Instagram Anda dari risiko pembajakan akun (phishing) atau pemblokiran (shadowban).</p>
+          Instagram Anda dari risiko pembajakan akun (phishing) atau pemblokiran (shadowban).
+        </p>
       </section>
     </div>
   </main>
@@ -650,14 +611,10 @@
         peladen. Pastikan Anda sudah download file backup (Export Data) jika ingin menyimpannya.
       </div>
 
-      <div class="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 w-full mt-6">
-        <button id="modal-cancel-wipe-button" type="button"
-          class="w-full sm:w-auto px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          Batal
-        </button>
-        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <div class="flex flex-col gap-3 w-full mt-6">
+        <div class="flex flex-col sm:flex-row gap-3 w-full">
           <button id="modal-export-backup-button" type="button"
-            class="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors whitespace-nowrap">
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -667,7 +624,7 @@
             Download Backup
           </button>
           <button id="modal-confirm-wipe-button" type="button"
-            class="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-sm font-medium transition-colors whitespace-nowrap">
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-sm font-medium transition-colors whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6" />
@@ -676,6 +633,10 @@
             Hapus & Mulai Sesi
           </button>
         </div>
+        <button id="modal-cancel-wipe-button" type="button"
+          class="w-full px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors text-center">
+          Batal
+        </button>
       </div>
     </div>
   </div>
