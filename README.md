@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/PRs-welcome-4f46e5.svg?style=flat-square" alt="PRs Welcome" />
   </p>
 
-  <img src="/public/assets/tutorial-export-json/10.webp" alt="InstaClear UI Preview" width="800" style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);" />
+  <img src="/public/assets/tutorial-export-json/10.webp" alt="InstaClear UI Preview" width="400" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
 </div>
 
 <br />
@@ -39,18 +39,28 @@
 
 ## Execution Guide
 
-1. Navigate to the Instagram <kbd>Settings</kbd> menu.
-2. Select <kbd>Accounts Center</kbd> at the top of the interface.
-3. Access <kbd>Your information and permissions</kbd>.
-4. Select <kbd>Export your information</kbd>.
-5. Click the <kbd>Create export</kbd> button.
-6. Select your target Instagram account.
-7. Choose <kbd>Export to device</kbd>.
-8. Under the specific information toggle, select **only** <kbd>Followers and following</kbd> to minimize export payload size.
-9. **CRITICAL:** Set the Date Range to <kbd>All time</kbd>.
-10. **CRITICAL:** Set the Format to <kbd>JSON</kbd>.
-11. Click <kbd>Create files</kbd> and await the download notification.
-12. Extract the downloaded archive and drag `followers_1.json` and `following.json` into the InstaClear dropzone.
+1. Navigate to the Instagram Settings menu and select <kbd>Accounts Center</kbd>.
+   <br /><img src="/public/assets/tutorial-export-json/1.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 1" />
+2. Under Account settings, select <kbd>Your information and permissions</kbd>.
+   <br /><img src="/public/assets/tutorial-export-json/2.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 2" />
+3. Select <kbd>Export your information</kbd>.
+   <br /><img src="/public/assets/tutorial-export-json/3.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 3" />
+4. Click the <kbd>Create export</kbd> button.
+   <br /><img src="/public/assets/tutorial-export-json/4.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 4" />
+5. Select your specific Instagram account profile.
+   <br /><img src="/public/assets/tutorial-export-json/5.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 5" />
+6. Choose where to export by selecting <kbd>Export to device</kbd>.
+   <br /><img src="/public/assets/tutorial-export-json/6.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 6" />
+7. Customize information: Uncheck everything, select ONLY <kbd>Followers and following</kbd> under Connections, then Save.
+   <br /><img src="/public/assets/tutorial-export-json/7.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 7" />
+8. **CRITICAL** Date range: Select <kbd>All time</kbd>, then Save.
+   <br /><img src="/public/assets/tutorial-export-json/8.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 8" />
+9. **CRITICAL** Format: Select <kbd>JSON</kbd>, then Save.
+   <br /><img src="/public/assets/tutorial-export-json/9.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 9" />
+10. Media quality: Select Higher quality, then click <kbd>Start export</kbd>.
+    <br /><img src="/public/assets/tutorial-export-json/10.webp" width="250" style="border-radius: 6px; margin: 10px 0;" alt="Step 10" />
+
+Once the export completes and you download the `.zip` archive, extract it and drag the `followers_1.json` and `following.json` files into the InstaClear interface.
 
 ## Local Development
 
