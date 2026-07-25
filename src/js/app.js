@@ -33,7 +33,7 @@ const AVATAR_COLORS = [
 ];
 
 const GRID_ROW_LAYOUT_CLASS =
-  'grid grid-cols-[45px_1fr_110px_90px] sm:grid-cols-[55px_1fr_130px_100px] md:grid-cols-[65px_1fr_140px_110px] gap-2 sm:gap-3 md:gap-4 items-center px-4 sm:px-6 py-3 border-b border-hairline';
+  'grid grid-cols-[45px_1fr_110px_90px] sm:grid-cols-[55px_1fr_130px_100px] md:grid-cols-[65px_1fr_140px_110px] gap-2 sm:gap-3 md:gap-4 items-center px-4 sm:px-6 py-3 border-b border-slate-100';
 
 let currentState = APPLICATION_STATE.IDLE;
 let finalTargetList = [];
@@ -61,12 +61,14 @@ function updateUIForState(state) {
   const dropzoneSection = document.getElementById('dropzone-section');
   const processingIndicator = document.getElementById('processing-indicator');
   const dataGridSection = document.getElementById('datagrid-section');
+  const seoSections = document.getElementById('seo-sections');
 
   switch (state) {
     case APPLICATION_STATE.IDLE:
       dropzoneSection.classList.remove('hidden');
       processingIndicator.classList.add('hidden');
       dataGridSection.classList.add('hidden');
+      if (seoSections) seoSections.classList.remove('hidden');
       break;
 
     case APPLICATION_STATE.VALIDATING:
@@ -76,12 +78,14 @@ function updateUIForState(state) {
       dropzoneSection.classList.add('hidden');
       processingIndicator.classList.remove('hidden');
       dataGridSection.classList.add('hidden');
+      if (seoSections) seoSections.classList.add('hidden');
       break;
 
     case APPLICATION_STATE.READY:
       dropzoneSection.classList.add('hidden');
       processingIndicator.classList.add('hidden');
       dataGridSection.classList.remove('hidden');
+      if (seoSections) seoSections.classList.add('hidden');
       break;
 
     case APPLICATION_STATE.MUTATING:
@@ -416,12 +420,12 @@ function renderDataGrid(targetUsernames) {
 
     rowElement.setAttribute('data-username', username);
     rowElement.className = isCompleted
-      ? `${GRID_ROW_LAYOUT_CLASS} opacity-50 bg-canvas-soft-2`
-      : `${GRID_ROW_LAYOUT_CLASS} hover:bg-canvas-soft transition-colors`;
+      ? `${GRID_ROW_LAYOUT_CLASS} opacity-50 bg-slate-50`
+      : `${GRID_ROW_LAYOUT_CLASS} hover:bg-slate-50 transition-colors`;
 
     const indexCell = document.createElement('div');
     indexCell.className =
-      'text-xs sm:text-sm text-mute font-mono tabular-nums text-left';
+      'text-xs sm:text-sm text-slate-500 font-mono tabular-nums text-left';
     indexCell.textContent = String(index + 1).padStart(3, '0');
     rowElement.appendChild(indexCell);
 
@@ -438,8 +442,8 @@ function renderDataGrid(targetUsernames) {
 
     const usernameText = document.createElement('span');
     usernameText.className = isCompleted
-      ? 'text-xs sm:text-sm text-mute line-through font-medium truncate'
-      : 'text-xs sm:text-sm text-ink font-medium truncate';
+      ? 'text-xs sm:text-sm text-slate-500 line-through font-medium truncate'
+      : 'text-xs sm:text-sm text-slate-900 font-medium truncate';
     usernameText.textContent = `@${username}`;
 
     usernameCell.appendChild(avatarElement);
@@ -451,7 +455,7 @@ function renderDataGrid(targetUsernames) {
 
     const statusBadge = document.createElement('span');
     statusBadge.className = isCompleted
-      ? 'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-canvas-soft-2 text-mute border border-hairline'
+      ? 'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200'
       : 'inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200';
     statusBadge.textContent = isCompleted ? 'UNFOLLOWED' : 'WAITING';
     statusCell.appendChild(statusBadge);
@@ -461,17 +465,16 @@ function renderDataGrid(targetUsernames) {
     actionsCell.className =
       'flex items-center justify-end gap-1.5 sm:gap-2 text-right';
 
-    const openLinkButton = document.createElement('button');
-    openLinkButton.type = 'button';
-    openLinkButton.className =
-      'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-hairline hover:bg-canvas-soft hover:border-hairline-strong transition-all text-body hover:text-ink shrink-0';
-    openLinkButton.setAttribute('title', 'Buka Profil Instagram');
-    openLinkButton.innerHTML =
+    const openLinkAnchor = document.createElement('a');
+    openLinkAnchor.href = `https://www.instagram.com/${username}`;
+    openLinkAnchor.target = '_blank';
+    openLinkAnchor.rel = 'noopener noreferrer';
+    openLinkAnchor.className =
+      'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-slate-200 hover:bg-white hover:border-slate-300 transition-all text-slate-500 hover:text-slate-900 shadow-sm shrink-0';
+    openLinkAnchor.setAttribute('title', 'Buka Profil Instagram');
+    openLinkAnchor.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-    openLinkButton.addEventListener('click', () => {
-      window.open(`https://www.instagram.com/${username}`, '_blank');
-    });
-    actionsCell.appendChild(openLinkButton);
+    actionsCell.appendChild(openLinkAnchor);
 
     if (isCompleted) {
       const completedIndicator = document.createElement('span');
@@ -484,7 +487,7 @@ function renderDataGrid(targetUsernames) {
       const markDoneButton = document.createElement('button');
       markDoneButton.type = 'button';
       markDoneButton.className =
-        'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-hairline hover:bg-emerald-50 hover:border-emerald-300 transition-all text-body hover:text-emerald-600 shrink-0';
+        'inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all text-slate-500 hover:text-emerald-600 shadow-sm shrink-0';
       markDoneButton.setAttribute('title', 'Tandai Selesai');
       markDoneButton.innerHTML =
         '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -656,6 +659,33 @@ function setupFullscreenToggle() {
   });
 }
 
+function setupGuideModal() {
+  const guideButton = document.getElementById('guide-button');
+  const tutorialModal = document.getElementById('tutorial-modal');
+  const closeTutorialButton = document.getElementById('close-tutorial-button');
+
+  if (!guideButton || !tutorialModal || !closeTutorialButton) return;
+
+  function openModal() {
+    tutorialModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    tutorialModal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  guideButton.addEventListener('click', openModal);
+  closeTutorialButton.addEventListener('click', closeModal);
+
+  tutorialModal.addEventListener('click', (event) => {
+    if (event.target === tutorialModal) {
+      closeModal();
+    }
+  });
+}
+
 function setupExportAndWipeHandlers() {
   const exportDataButton = document.getElementById('export-data-button');
   const importDataButton = document.getElementById('import-data-button');
@@ -792,6 +822,7 @@ function initializeApplication() {
   setupDropzone();
   setupProcessButton();
   setupFullscreenToggle();
+  setupGuideModal();
   setupExportAndWipeHandlers();
 
   const savedActiveAccount = localStorage.getItem('instaclear_active_account');
