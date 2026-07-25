@@ -272,7 +272,7 @@ function checkMandatoryFiles() {
 }
 
 function updateProcessButtonState() {
-  const processButton = document.getElementById('process-button');
+  const processButton = document.getElementById('process-btn');
   if (!processButton) return;
 
   if (checkMandatoryFiles()) {
@@ -610,7 +610,7 @@ function setupDropzone() {
 }
 
 function setupProcessButton() {
-  const processButton = document.getElementById('process-button');
+  const processButton = document.getElementById('process-btn');
   if (!processButton) return;
 
   processButton.addEventListener('click', () => {

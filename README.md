@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/PRs-welcome-4f46e5.svg?style=flat-square" alt="PRs Welcome" />
   </p>
 
-  <img src="/public/assets/tutorial-export-json/10.webp" alt="InstaClear UI Preview" width="400" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+  <img src="/public/assets/screenshot.png" alt="InstaClear UI Preview" width="600" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
 </div>
 
 <br />
