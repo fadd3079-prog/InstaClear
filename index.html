@@ -650,29 +650,29 @@
         peladen. Pastikan Anda sudah download file backup (Export Data) jika ingin menyimpannya.
       </div>
 
-      <div class="flex flex-col sm:flex-row justify-end gap-2">
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 w-full mt-6">
         <button id="modal-cancel-wipe-button" type="button"
-          class="px-3.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+          class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors font-medium w-full sm:w-auto whitespace-nowrap">
           Batal
         </button>
         <button id="modal-export-backup-button" type="button"
-          class="inline-flex items-center justify-center gap-1.5 px-3.5 h-9 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+          class="flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors font-medium w-full sm:w-auto whitespace-nowrap">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Download Backup Dulu
+          Download Backup
         </button>
         <button id="modal-confirm-wipe-button" type="button"
-          class="inline-flex items-center justify-center gap-1.5 px-3.5 h-9 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-all shadow-sm">
+          class="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-sm transition-colors font-medium w-full sm:w-auto whitespace-nowrap">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6" />
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
           </svg>
-          Ya, Hapus & Mulai Sesi Baru
+          Hapus & Mulai Sesi
         </button>
       </div>
     </div>
