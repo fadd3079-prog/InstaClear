@@ -89,7 +89,7 @@
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
-          Impor Data
+          Import Data
         </button>
         <button id="export-data-button" type="button"
           class="inline-flex items-center gap-1.5 px-3 h-8 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-md hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
@@ -99,7 +99,7 @@
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Ekspor Data
+          Export Data
         </button>
         <button id="reset-button" type="button"
           class="inline-flex items-center gap-1.5 px-3 h-8 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-md hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
@@ -125,12 +125,9 @@
     <section id="dropzone-section">
       <div class="mb-10 animate-fade-in-up">
         <p class="text-xs font-mono text-slate-500 uppercase tracking-wide mb-3">Audit Engine</p>
-        <h1 class="text-3xl font-semibold tracking-display-lg text-slate-900 leading-tight mb-2">Unggah Berkas Ekspor
-          Meta.
+        <h1 class="text-3xl font-semibold tracking-display-lg text-slate-900 leading-tight mb-2">Upload File Export Meta.
         </h1>
-        <p class="text-base text-slate-600 leading-relaxed max-w-xl">Seret dan lepaskan berkas JSON hasil ekspor
-          Instagram ke
-          area di bawah ini. Sistem akan memproses data secara lokal di perangkat Anda.</p>
+        <p class="text-base text-slate-600 leading-relaxed max-w-xl">Drag dan drop file JSON hasil export Instagram ke area di bawah ini. Sistem akan memproses data secara lokal di perangkat Anda.</p>
       </div>
 
       <div id="dropzone-area"
@@ -146,12 +143,12 @@
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
-        <p class="text-sm font-medium text-ink mb-1">Seret & Lepas berkas JSON di sini, atau klik untuk merambah</p>
-        <p class="text-xs text-mute font-mono">Mendukung berkas format .json hasil ekspor Meta</p>
+        <p class="text-sm font-medium text-ink mb-1">Drag and drop file JSON di sini, atau klik untuk browse</p>
+        <p class="text-xs text-mute font-mono">Mendukung file format .json dari hasil export Meta (followers_1.json & following.json)</p>
       </div>
 
       <div class="mb-10">
-        <h2 class="text-xs font-mono text-mute uppercase tracking-wide mb-4">Status Berkas Ekspor</h2>
+        <h2 class="text-xs font-mono text-mute uppercase tracking-wide mb-4">Status File Export</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div class="p-4 rounded-lg border border-hairline bg-canvas shadow-card flex items-center justify-between">
             <div class="space-y-1">
@@ -241,7 +238,7 @@
 
     <div id="processing-indicator" class="hidden py-20 text-center animate-fade-in">
       <div class="w-10 h-10 border-2 border-hairline border-t-ink rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-sm font-medium text-ink mb-1">Memproses Berkas JSON...</p>
+      <p class="text-sm font-medium text-ink mb-1">Memproses File JSON...</p>
       <p class="text-xs text-mute font-mono">Mengekstrak dan mengkalkulasi selisih himpunan data</p>
     </div>
 
@@ -283,7 +280,7 @@
                 <div
                   class="grid grid-cols-[45px_1fr_110px_90px] sm:grid-cols-[55px_1fr_130px_100px] md:grid-cols-[65px_1fr_140px_110px] gap-2 sm:gap-3 md:gap-4 items-center w-full">
                   <span class="text-xs font-mono text-slate-500 uppercase tracking-wide text-left">#</span>
-                  <span class="text-xs font-mono text-slate-500 uppercase tracking-wide text-left">Pengguna</span>
+                  <span class="text-xs font-mono text-slate-500 uppercase tracking-wide text-left">Username</span>
                   <span class="text-xs font-mono text-slate-500 uppercase tracking-wide text-left">Status</span>
                   <span class="text-xs font-mono text-slate-500 uppercase tracking-wide text-right">Aksi</span>
                 </div>
@@ -319,9 +316,9 @@
             <div
               class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-4 text-indigo-700 font-semibold shadow-sm">
               1</div>
-            <h3 class="text-lg font-medium text-slate-900 mb-2">Ekspor & Unggah</h3>
-            <p class="text-sm text-slate-600 leading-relaxed">Unduh data koneksi Instagram Anda dalam format JSON dari
-              Pusat Akun Meta. Unggah berkas <code
+            <h3 class="text-lg font-medium text-slate-900 mb-2">Export & Upload</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Download data koneksi Instagram Anda dalam format JSON dari
+              Pusat Akun Meta. Upload file <code
                 class="font-mono text-xs bg-slate-50 px-1 py-0.5 rounded border border-slate-200">followers_1.json</code>
               dan <code
                 class="font-mono text-xs bg-slate-50 px-1 py-0.5 rounded border border-slate-200">following.json</code>
@@ -348,7 +345,7 @@
               class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-4 text-indigo-700 font-semibold shadow-sm">
               4</div>
             <h3 class="text-lg font-medium text-slate-900 mb-2">Cadangkan Progres</h3>
-            <p class="text-sm text-slate-600 leading-relaxed">Gunakan fitur Ekspor Data untuk mengunduh riwayat centang
+            <p class="text-sm text-slate-600 leading-relaxed">Gunakan fitur Export Data untuk download riwayat centang
               Anda, sehingga Anda bisa melanjutkannya di kemudian hari tanpa mengulang dari awal.</p>
           </div>
         </div>
@@ -386,7 +383,7 @@
           <span class="text-sm font-medium text-slate-700">InstaClear</span>
         </div>
         <p class="text-xs">© 2026 InstaClear by Fadd Graphics. All rights reserved.</p>
-        <p class="text-xs font-mono mt-1">Data diproses secara lokal. Tidak ada unggahan ke server.</p>
+        <p class="text-xs font-mono mt-1">Data diproses secara lokal. Tidak ada upload ke server.</p>
       </div>
 
       <div class="flex flex-col items-center md:items-end gap-4">
@@ -434,7 +431,7 @@
   <div id="tutorial-modal" class="fixed inset-0 z-50 flex flex-col bg-slate-50 hidden">
     <div
       class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-      <h2 class="text-xl font-semibold text-slate-900">Panduan Ekspor Data JSON Instagram</h2>
+      <h2 class="text-xl font-semibold text-slate-900">Panduan Export Data JSON Instagram</h2>
       <button id="close-tutorial-button" type="button"
         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-all shadow-md">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -485,9 +482,8 @@
           <div class="order-2 md:order-1">
             <span
               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm mb-4 shadow-sm">3</span>
-            <h3 class="text-xl font-semibold text-slate-900 mb-2">Pilih Menu Ekspor</h3>
-            <p class="text-slate-600 leading-relaxed">Ketuk opsi <strong>Export your information</strong> (Ekspor
-              informasi Anda) untuk mulai meminta salinan data.</p>
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">Pilih Menu Export</h3>
+            <p class="text-slate-600 leading-relaxed">Ketuk opsi <strong>Export your information</strong> untuk mulai meminta salinan data.</p>
           </div>
           <div class="order-1 md:order-2 flex justify-center md:justify-end">
             <img src="/assets/tutorial-export-json/3.webp" alt="Step 3" loading="lazy"
@@ -500,7 +496,7 @@
           <div class="order-2 md:order-2">
             <span
               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm mb-4 shadow-sm">4</span>
-            <h3 class="text-xl font-semibold text-slate-900 mb-2">Buat Ekspor Baru</h3>
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">Buat Export Baru</h3>
             <p class="text-slate-600 leading-relaxed">Tekan tombol biru bertuliskan <strong>Create export</strong>.</p>
           </div>
           <div class="order-1 md:order-1 flex justify-center md:justify-start">
@@ -529,9 +525,9 @@
           <div class="order-2 md:order-2">
             <span
               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm mb-4 shadow-sm">6</span>
-            <h3 class="text-xl font-semibold text-slate-900 mb-2">Pilih Tujuan Ekspor</h3>
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">Pilih Tujuan Export</h3>
             <p class="text-slate-600 leading-relaxed">Pilih opsi <strong>Export to device</strong> agar file data
-              langsung diunduh ke perangkat Anda.</p>
+              langsung di-download ke perangkat Anda.</p>
           </div>
           <div class="order-1 md:order-1 flex justify-center md:justify-start">
             <img src="/assets/tutorial-export-json/6.webp" alt="Step 6" loading="lazy"
@@ -594,7 +590,7 @@
           <div class="order-2 md:order-2">
             <span
               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm mb-4 shadow-sm">10</span>
-            <h3 class="text-xl font-semibold text-slate-900 mb-2">Konfirmasi & Mulai Ekspor</h3>
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">Konfirmasi & Mulai Export</h3>
             <p class="text-slate-600 leading-relaxed">Pada bagian <em>Media quality</em>, Anda dapat memilih
               <strong>Higher quality</strong> (disarankan). Setelah semua sesuai, tekan tombol <strong>Start
                 export</strong>.
@@ -647,7 +643,7 @@
       <div
         class="p-3.5 bg-amber-50 border border-amber-200 rounded-lg mb-5 text-xs text-amber-800 leading-relaxed shadow-sm">
         <strong>Peringatan:</strong> Membuat sesi baru akan menghapus seluruh data progres saat ini dari perangkat dan
-        peladen. Pastikan Anda sudah mengunduh cadangan data (Export Data) jika ingin menyimpannya.
+        peladen. Pastikan Anda sudah download file backup (Export Data) jika ingin menyimpannya.
       </div>
 
       <div class="flex flex-col sm:flex-row justify-end gap-2">
@@ -663,7 +659,7 @@
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Unduh Cadangan Dulu
+          Download Backup Dulu
         </button>
         <button id="modal-confirm-wipe-button" type="button"
           class="inline-flex items-center justify-center gap-1.5 px-3.5 h-9 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-all shadow-sm">

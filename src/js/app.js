@@ -212,7 +212,7 @@ function exportSessionData() {
   document.body.removeChild(anchorElement);
   URL.revokeObjectURL(downloadUrl);
 
-  showAlert('Data cadangan (.json) berhasil diunduh!', 'success');
+  showAlert('File backup (.json) berhasil di-download!', 'success');
 }
 
 async function importSessionData(file) {
@@ -226,7 +226,7 @@ async function importSessionData(file) {
       !Array.isArray(parsedData.allTargets) ||
       !Array.isArray(parsedData.completedUnfollowedTargets)
     ) {
-      throw new Error('Struktur berkas cadangan tidak valid.');
+      throw new Error('Struktur file backup tidak valid.');
     }
 
     activeAccountUsername = parsedData.accountUsername;
@@ -240,9 +240,9 @@ async function importSessionData(file) {
     updateStatistics();
     transitionState(APPLICATION_STATE.READY);
 
-    showAlert('Data cadangan berhasil diimpor. Progres Anda telah dipulihkan sepenuhnya.', 'success');
+    showAlert('File backup berhasil di-import. Progress Anda telah dipulihkan sepenuhnya.', 'success');
   } catch (error) {
-    showAlert('Gagal mengimpor data: ' + error.message, 'error');
+    showAlert('Gagal import data: ' + error.message, 'error');
   }
 }
 
@@ -320,7 +320,7 @@ async function processFiles(fileList) {
 function executeComputationAndHydrate() {
   if (!checkMandatoryFiles()) {
     showAlert(
-      'Berkas Mengikuti (following.json) dan Pengikut (followers_1.json) wajib diunggah sebelum memulai proses.',
+      'File Following (following.json) dan Followers (followers_1.json) wajib di-upload sebelum memulai proses.',
       'warning'
     );
     return;
@@ -369,7 +369,7 @@ function startProcessingForAccount(accountUsername) {
 
   if (finalTargetList.length === 0) {
     showAlert(
-      'Struktur berkas tidak valid atau tidak memuat daftar nama pengguna.',
+      'Belum ada data. Silakan upload file JSON Anda untuk memulai analisis.',
       'warning'
     );
     transitionState(APPLICATION_STATE.IDLE);
